@@ -42,7 +42,6 @@
 ## About the Project
 
 This project aims at delivering a package which is capable of subscribing to a ROS2 topic and store the messages passed through the topic in JSON format. The resultant JSON file can be used for better visualization of data, using plots or charts. This is particularly useful in the logging and analysis of real-time data, especially monitoring the context switches, and use of shared resouces.
----
 
 ### Why ROS2?
 
