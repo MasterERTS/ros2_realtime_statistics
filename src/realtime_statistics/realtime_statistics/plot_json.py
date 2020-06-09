@@ -55,14 +55,14 @@ class WriteJson(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    writejson = WriteJson()
+    minimal_subscriber = WriteJson()
 
-    rclpy.spin(writejson)
+    rclpy.spin(minimal_subscriber)
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    writejson.destroy_node()
+    minimal_subscriber.destroy_node()
     rclpy.shutdown()
 
 
