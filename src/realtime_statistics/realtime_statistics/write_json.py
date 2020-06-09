@@ -15,6 +15,7 @@
 import rclpy
 from rclpy.node import Node
 import json
+import yaml
 from pendulum_msgs_v2.msg import ControllerStats 
 from pendulum_msgs_v2.msg import PendulumStats
 
@@ -57,16 +58,15 @@ class WriteJson(Node):
             json.dump(empty_data, cfile)
     
     def convert_msg_to_dict(self, msg):
-        data = {}
-        # computations
-        return data
+        yaml_data = yaml.load(str(msg))
+        return yaml_data
 
     def add_data_to_json(self, data, path):
         with open(path, "r+") as file:
             json_data = json.load(file)
             json_data.update(data)
             file.seek(0)
-            json.dump(data, file)
+            json.dump(data, file, indent=4)
 
 
 def main(args=None):
