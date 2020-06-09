@@ -14,6 +14,7 @@
 
 import rclpy
 from rclpy.node import Node
+import json
 from pendulum_msgs_v2.msg import ControllerStats 
 from pendulum_msgs_v2.msg import PendulumStats
 
@@ -32,24 +33,40 @@ class WriteJson(Node):
             self.driver_statistics_callback,
             10)
         
-        self.create_json_file()
+        self.driver_stats_path = "../../resource/driver_stats.json"
+        self.controller_stats_path = "../../resource/controller_stats.json"
+        
+        self.create_json_files()
 
         self.sub_controller_stats # prevent unused variable
         self.sub_pendulum_stats # prevent unused variable warning
 
     def controller_statistics_callback(self, msg):
-        self.get_logger().info('I heard: "%s"' % msg.data)
+        data = self.convert_msg_to_dict(msg)
+        self.add_data_to_json(data, self.controller_stats_path)
     
     def driver_statistics_callback(self, msg):
-        x = 10
+        data = self.convert_msg_to_dict(msg)
+        self.add_data_to_json(data, self.driver_stats_path)
     
-    def create_json_file(self):
-        # lol
-        x = 10
+    def create_json_files(self):
+        empty_data = {}
+        with open(self.driver_stats_path, 'w') as dfile:
+            json.dump(empty_data, dfile)
+        with open(self.controller_stats_path, 'w') as cfile:
+            json.dump(empty_data, cfile)
     
-    def add_data_to_json(self):
-        # lol
-        x = 10
+    def convert_msg_to_dict(self, msg):
+        data = {}
+        # computations
+        return data
+
+    def add_data_to_json(self, data, path):
+        with open(path, "r+") as file:
+            json_data = json.load(file)
+            json_data.update(data)
+            file.seek(0)
+            json.dump(data, file)
 
 
 def main(args=None):
