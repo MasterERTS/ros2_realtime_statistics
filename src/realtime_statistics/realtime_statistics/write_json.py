@@ -67,18 +67,19 @@ class WriteJson(Node):
         lst_msg = str(msg).split("pendulum_msgs_v2.msg.")
         msg_dict = {}
         msg_dict[self.data_number] = {}
-        nlist = []
-        mlist = []
+        fields_list = []
+        key_value_list = []
         lst_msg.pop(0)
         first_round = True
 
+        ## Dump non relevant data
         for elem in lst_msg:
             if first_round:
-                nlist.append([lst_msg[0]])
-                if ("ControllerStats") in nlist[0][0]:
-                    nlist[0][0] = nlist[0][0].replace("ControllerStats", "")
-                elif ("PendulumStats") in nlist[0][0]:
-                    nlist[0][0] = nlist[0][0].replace("PendulumStats", "")
+                fields_list.append([lst_msg[0]])
+                if ("ControllerStats(") in fields_list[0][0]:
+                    fields_list[0][0] = fields_list[0][0].replace("ControllerStats(", "")
+                elif ("PendulumStats(") in fields_list[0][0]:
+                    fields_list[0][0] = fields_list[0][0].replace("PendulumStats(", "")
                 first_round = False
 
             if ("TimerStats") in elem:
@@ -91,39 +92,36 @@ class WriteJson(Node):
                 elem = elem.replace("TopicStats", "")
             elif("Rusage") in elem:
                 elem = elem.replace("Rusage", "")
+            
+            if "(" in elem:
+                elem = elem.replace("(", "")
+            if ")" in elem:
+                elem = elem.replace(")", "")
+            if "" == elem:
+                elem.remove(elem)
+            if ' ' in elem:
+                elem = elem.replace(" ", "")
 
             if (",") in elem:
-                nlist.append(elem.split(","))
-                
-        for elem in nlist:
-            for x in elem:
-                index = elem.index(x)
-                if "(" in x:
-                    nlist[nlist.index(elem)][index] = nlist[nlist.index(elem)][index].replace("(", "")
-                if ")" in x:
-                    nlist[nlist.index(elem)][index] = nlist[nlist.index(elem)][index].replace(")", "")
-                if "" == x:
-                    elem.remove(x)
-                if ' ' in x:
-                    nlist[nlist.index(elem)][index] = nlist[nlist.index(elem)][index].replace(" ", "")
+                fields_list.append(elem.split(","))
 
-        for elem in nlist:
+        for elem in fields_list:
             for x in elem:
                 if "=" in x:
-                    mlist.append(x.split("="))
+                    key_value_list.append(x.split("="))
 
-        for x in range(len(nlist)):
-            for y in range(len(nlist[x])):
-                if "stats" in nlist[x][y]:
-                    nlist[x][y] = nlist[x][y].replace(' ', '')
-                    nlist[x][y] = nlist[x][y].replace('=', '')
-                    msg_dict[self.data_number][nlist[x][y]] = {}
-                    for elem in mlist:
+        for x in range(len(fields_list)):
+            for y in range(len(fields_list[x])):
+                if "stats" in fields_list[x][y]:
+                    fields_list[x][y] = fields_list[x][y].replace(' ', '')
+                    fields_list[x][y] = fields_list[x][y].replace('=', '')
+                    msg_dict[self.data_number][fields_list[x][y]] = {}
+                    for elem in key_value_list:
                         for l in elem:
                             if "stats" in l or l == "":
                                 continue
                             else:
-                                msg_dict[self.data_number][nlist[x][y]][elem[0]] = elem[1]
+                                msg_dict[self.data_number][fields_list[x][y]][elem[0]] = float(elem[1])
 
         return(msg_dict)
 
