@@ -15,15 +15,10 @@
 import rclpy
 from rclpy.node import Node
 import json
-from io import StringIO
-import time
-from benedict import benedict
-import yaml
 import pathlib
 from pendulum_msgs_v2.msg import ControllerStats 
 from pendulum_msgs_v2.msg import PendulumStats
 
-_JSON_ESCAPE = {'\\':r'\\', '"':'\\"', '\b':r'\b', '\f':r'\f', '\n':r'\n', '\r':r'\r', '\t':r'\t'}
 class WriteJson(Node):
 
     def __init__(self):
