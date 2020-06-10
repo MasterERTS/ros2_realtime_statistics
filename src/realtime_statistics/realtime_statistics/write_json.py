@@ -71,6 +71,7 @@ class WriteJson(Node):
         mlist = []
         lst_msg.pop(0)
         first_round = True
+
         for elem in lst_msg:
             if first_round:
                 nlist.append([lst_msg[0]])
@@ -96,17 +97,15 @@ class WriteJson(Node):
                 
         for elem in nlist:
             for x in elem:
+                index = elem.index(x)
                 if "(" in x:
-                    nlist[nlist.index(elem)][elem.index(x)] = x.replace("(", "")
+                    nlist[nlist.index(elem)][index] = nlist[nlist.index(elem)][index].replace("(", "")
                 if ")" in x:
-                    nlist[nlist.index(elem)][elem.index(x)] = x.replace(")", "")
+                    nlist[nlist.index(elem)][index] = nlist[nlist.index(elem)][index].replace(")", "")
                 if "" == x:
                     elem.remove(x)
-
-        for elem in nlist:
-            for x in elem:
                 if ' ' in x:
-                    nlist[nlist.index(elem)][elem.index(x)] = x.replace(" ", "")
+                    nlist[nlist.index(elem)][index] = nlist[nlist.index(elem)][index].replace(" ", "")
 
         for elem in nlist:
             for x in elem:
