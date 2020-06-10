@@ -4,7 +4,7 @@ package_name = 'realtime_statistics'
 
 setup(
     name=package_name,
-    version='0.0.0',
+    version='0.0.1',
     packages=[package_name],
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -15,11 +15,12 @@ setup(
     zip_safe=True,
     maintainer='erwin',
     maintainer_email='erwin.lejeune15@gmail.com',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    description='Data retriever for realtime pendulum statistics',
+    license='MIT',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'write_json = realtime_statistics.write_json:main',
         ],
     },
 )

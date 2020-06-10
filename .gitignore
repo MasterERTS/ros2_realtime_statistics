@@ -192,3 +192,4 @@ vgcore.*
 *.gch
 *.patch
 .vscode/*
+*.pyc
