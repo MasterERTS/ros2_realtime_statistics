@@ -14,55 +14,52 @@
 
 import rclpy
 from rclpy.node import Node
-from pendulum_msgs_v2.msg import ControllerStats 
-from pendulum_msgs_v2.msg import PendulumStats
+import matplotlib.pyplot as plt
+import json
+import pathlib
 
-class WriteJson(Node):
+class PlotJson(Node):
 
     def __init__(self):
+        ''' 
+        To Do :
+        ------
+        Find out how one can use positional arguments to define what the user want to plot
+        Does this work or do we have to specify how often the node must run (only once here !)
+        '''
         super().__init__('node')
-        self.sub_controller_stats = self.create_subscription(
-            ControllerStats,
-            '/controller_statistics',
-            self.controller_statistics_callback,
-            10)
-        self.sub_pendulum_stats = self.create_subscription(
-            PendulumStats,
-            '/driver_statistics',
-            self.driver_statistics_callback,
-            10)
-        
-        self.create_json_file()
 
-        self.sub_controller_stats # prevent unused variable
-        self.sub_pendulum_stats # prevent unused variable warning
+        default_path = str(pathlib.Path(__file__).parent.absolute())
+        default_path = default_path.replace('/build/realtime_statistics/realtime_statistics', '')
 
-    def controller_statistics_callback(self, msg):
-        self.get_logger().info('I heard: "%s"' % msg.data)
+        self.driver_stats_path = default_path + "/ros2_realtime_statistics/data/driver_stats.json"
+        self.controller_stats_path = default_path + "/ros2_realtime_statistics/data//controller_stats.json"
+
+        json_data = self.read_json_file(self.driver_stats_path)
+        self.plot_from_json(json_data)
+
+    def read_json_file(self, path):
+        with open(path, "r") as file:
+            data = json.load(file)
+        return data
     
-    def driver_statistics_callback(self, msg):
-        x = 10
-    
-    def create_json_file(self):
-        # lol
-        x = 10
-    
-    def add_data_to_json(self):
-        # lol
-        x = 10
+    def plot_from_json(self, json_data):
+        self.fig, self.axs = plt.subplots(figsize=(12, 8))
+        # plot for each keys
+
 
 
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = WriteJson()
+    plt_json = PlotJson()
 
-    rclpy.spin(minimal_subscriber)
+    rclpy.spin(plt_json)
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    minimal_subscriber.destroy_node()
+    plt_json.destroy_node()
     rclpy.shutdown()
 
 
