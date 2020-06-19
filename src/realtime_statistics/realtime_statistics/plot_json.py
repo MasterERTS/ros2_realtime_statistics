@@ -16,6 +16,7 @@ import rclpy
 from rclpy.node import Node
 import matplotlib.pyplot as plt
 import json
+import random
 import pathlib
 
 class PlotJson(Node):
@@ -36,6 +37,7 @@ class PlotJson(Node):
         self.controller_stats_path = default_path + "/ros2_realtime_statistics/data//controller_stats.json"
 
         json_data = self.read_json_file(self.driver_stats_path)
+        self.dict_json_sorted = dict()
         self.plot_from_json(json_data)
 
     def read_json_file(self, path):
@@ -45,9 +47,19 @@ class PlotJson(Node):
     
     def plot_from_json(self, json_data):
         self.fig, self.axs = plt.subplots(figsize=(12, 8))
-        # plot for each keys
+        n_pts = range(0, int(list(json_data.keys())[-1]))
+        for number_key in json_data:
+            for category in json_data[number_key]:
+                self.dict_json_sorted[category] = dict()
+                for data in json_data[number_key][category]:
+                    self.dict_json_sorted[category][data] = []
 
+        for number_key in json_data:
+            for category in json_data[number_key]:
+                for data in json_data[number_key][category]:
+                    self.dict_json_sorted[category][data].append(json_data[number_key][category][data])
 
+        rdn_number_key = random.cho
 
 def main(args=None):
     rclpy.init(args=args)
