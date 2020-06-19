@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'write_json = realtime_statistics.write_json:main',
+            'plot_json = realtime_statistics.plot_json:main',
         ],
     },
 )
