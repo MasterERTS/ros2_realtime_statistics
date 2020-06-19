@@ -6,10 +6,19 @@ import rclpy
 from rclpy.node import Node
 import json
 from time import time
-from math import floor
+import subprocess
 import pathlib
 from pendulum_msgs_v2.msg import ControllerStats 
 from pendulum_msgs_v2.msg import PendulumStats
+
+cmd1 = subprocess.Popen(['dmesg'], stdout=subprocess.PIPE)
+cmd2 = subprocess.Popen(['grep', '-i', 'xenomai'], stdin=cmd1.stdout, stdout=subprocess.PIPE)
+output, err = cmd2.communicate()
+
+if "Xenomai" in str(output):
+    RT = 1
+else:
+    RT = 0
 
 class WriteJson(Node):
 
@@ -33,8 +42,13 @@ class WriteJson(Node):
         default_path = str(pathlib.Path(__file__).parent.absolute())
         default_path = default_path.replace('/build/realtime_statistics/realtime_statistics', '')
 
-        self.driver_stats_path = default_path + "/ros2_realtime_statistics/data/driver_stats.json"
-        self.controller_stats_path = default_path + "/ros2_realtime_statistics/data//controller_stats.json"
+        if RT == 0:
+            self.driver_stats_path = default_path + "/ros2_realtime_statistics/data/driver_nrt_stats.json"
+            self.controller_stats_path = default_path + "/ros2_realtime_statistics/data//controller_nrt_stats.json"
+        else:
+            self.driver_stats_path = default_path + "/ros2_realtime_statistics/data/driver_rt_stats.json"
+            self.controller_stats_path = default_path + "/ros2_realtime_statistics/data//controller_rt_stats.json"
+
         self.create_json_files()
  
         self.data_number_controller = 0

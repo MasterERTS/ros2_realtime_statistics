@@ -5,30 +5,38 @@ import rclpy
 from rclpy.node import Node
 import matplotlib.pyplot as plt
 import json
+import subprocess
 import random
 import pathlib
 
 
-MODE = 1 # 0 for Driver, 1 for Controller stats
-RT = 0
+MODE = 0 # 0 for Driver, 1 for Controller stats
+
+cmd1 = subprocess.Popen(['dmesg'], stdout=subprocess.PIPE)
+cmd2 = subprocess.Popen(['grep', '-i', 'xenomai'], stdin=cmd1.stdout, stdout=subprocess.PIPE)
+output, err = cmd2.communicate()
+
+if "Xenomai" in str(output):
+    RT = 1
+else:
+    RT = 0
 
 class PlotJson(Node):
 
     def __init__(self):
-        ''' 
-        To Do :
-        ------
-        Find out how one can use positional arguments to define what the user want to plot
-        Does this work or do we have to specify how often the node must run (only once here !)
-        '''
         super().__init__('node')
 
         default_path = str(pathlib.Path(__file__).parent.absolute())
         default_path = default_path.replace('/build/realtime_statistics/realtime_statistics', '')
 
         self.default_data_path = default_path + "/ros2_realtime_statistics/data/"
-        self.driver_stats_path = default_path + "/ros2_realtime_statistics/data/driver_stats.json"
-        self.controller_stats_path = default_path + "/ros2_realtime_statistics/data//controller_stats.json"
+
+        if RT == 0:
+            self.driver_stats_path = default_path + "/ros2_realtime_statistics/data/driver_nrt_stats.json"
+            self.controller_stats_path = default_path + "/ros2_realtime_statistics/data//controller_nrt_stats.json"
+        else:
+            self.driver_stats_path = default_path + "/ros2_realtime_statistics/data/driver_rt_stats.json"
+            self.controller_stats_path = default_path + "/ros2_realtime_statistics/data//controller_rt_stats.json"
 
         label = ""
 
@@ -92,7 +100,7 @@ def main(args=None):
     rclpy.spin_once(plt_json)
 
     # Destroy the node explicitly
-    # (optional - otherwise it will be done automatically
+    # (cmdional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
     plt_json.destroy_node()
     rclpy.shutdown()
