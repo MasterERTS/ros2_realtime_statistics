@@ -1,16 +1,6 @@
-# Copyright 2016 Open Source Robotics Foundation, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Copyright 2020 Erwin Lejeune
+# Under MIT Licence
+# <erwin.lejeune15@gmail.com>
 
 import rclpy
 from rclpy.node import Node
@@ -23,6 +13,10 @@ class WriteJson(Node):
 
     def __init__(self):
         super().__init__('node')
+
+        self.last_controller_msg = ''
+        self.last_driver_msg = ''
+
         self.sub_controller_stats = self.create_subscription(
             ControllerStats,
             '/controller_statistics',
@@ -33,7 +27,6 @@ class WriteJson(Node):
             '/driver_statistics',
             self.driver_statistics_callback,
             10)
-        
         
         default_path = str(pathlib.Path(__file__).parent.absolute())
         default_path = default_path.replace('/build/realtime_statistics/realtime_statistics', '')
@@ -49,14 +42,18 @@ class WriteJson(Node):
         self.sub_pendulum_stats # prevent unused variable warning
 
     def controller_statistics_callback(self, msg):
-        data = self.convert_msg_to_dict(msg, self.data_number_controller)
-        self.add_data_to_json(data, self.controller_stats_path)
-        self.data_number_controller += 1
+        if str(msg) != self.last_controller_msg:
+            data = self.convert_msg_to_dict(msg, self.data_number_controller)
+            self.add_data_to_json(data, self.controller_stats_path)
+            self.data_number_controller += 1
+            self.last_controller_msg = str(msg)
     
     def driver_statistics_callback(self, msg):
-        data = self.convert_msg_to_dict(msg, self.data_number_driver)
-        self.add_data_to_json(data, self.driver_stats_path)
-        self.data_number_driver += 1
+        if str(msg) != self.last_driver_msg:
+            data = self.convert_msg_to_dict(msg, self.data_number_driver)
+            self.add_data_to_json(data, self.driver_stats_path)
+            self.data_number_driver += 1
+            self.last_driver_msg = str(msg)
 
     def create_json_files(self):
         empty_data = {}
