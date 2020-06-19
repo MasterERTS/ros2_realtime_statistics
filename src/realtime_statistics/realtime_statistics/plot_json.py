@@ -58,6 +58,18 @@ class PlotJson(Node):
         with open(path, "r") as file:
             data = json.load(file)
         return data
+
+    def plot_from_json(self, filepath):
+        json_data = self.read_json_file(filepath)
+        nlist = self.sorted_data_from_json(json_data)
+        if MODE == 1:
+            label = "Controller"
+        elif MODE == 0:
+            label = "Driver"
+        else:
+            print("Error : mode not supported")
+            self.destroy_node()
+        self.plot_from_sorted_data(nlist, label)
     
     def sorted_data_from_json(self, json_data):
         n_pts = range(0, int(list(json_data.keys())[-1]) + 1)
@@ -75,8 +87,17 @@ class PlotJson(Node):
         return n_pts
     
     def plot_from_sorted_data(self, n_pts_list, label):
+        rt_label = ""
+        if RT == 0:
+            rt_label = "(NRT Linux) "
+        elif RT == 1: 
+            rt_label = "(Xenomai) "
+        else:
+            print("Error, RT mode should be 0 or 1")
+            exit()
+
         self.fig, self.axs = plt.subplots(2, 2, figsize=(12, 8))
-        self.fig.suptitle("Real Time " + label + " Statistics - Inverted Pendulum")
+        self.fig.suptitle("Real Time " + rt_label + label + " Statistics - Inverted Pendulum")
         rdn_category_key = random.choice(list(self.dict_json_sorted.keys()))
         self.axs[0, 0].plot(n_pts_list, self.dict_json_sorted[rdn_category_key]["jitter_mean_usec"])
         self.axs[0, 0].set_title("Mean Jitters (µs)")
@@ -84,8 +105,8 @@ class PlotJson(Node):
         self.axs[0, 1].set_title("STD Jitters (µs)")
         self.axs[1, 1].plot(n_pts_list, self.dict_json_sorted[rdn_category_key]["involuntary_context_switches"])
         self.axs[1, 1].set_title("Involuntary Context Switches")
-        self.axs[1, 0].plot(n_pts_list, self.dict_json_sorted[rdn_category_key]["voluntary_context_switches"])
-        self.axs[1, 0].set_title("Voluntary Context Switches")
+        self.axs[1, 0].plot(n_pts_list, self.dict_json_sorted[rdn_category_key]["jitter_max_usec"])
+        self.axs[1, 0].set_title("Max Jitters (µs)")
         if (RT == 0):
             plt.savefig(self.default_data_path + "nrt_" + label + '.png')
         else:
