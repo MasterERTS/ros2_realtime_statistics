@@ -6,6 +6,7 @@ import rclpy
 from rclpy.node import Node
 import json
 from time import time
+import argparse
 import subprocess
 import pathlib
 from pendulum_msgs_v2.msg import ControllerStats 
@@ -19,6 +20,17 @@ if "Xenomai" in str(output):
     RT = 1
 else:
     RT = 0
+
+def get_args():
+    parser = argparse.ArgumentParser(
+        description="Real-Time Statistics Plotter."
+    )
+    parser.add_argument("--time",
+                        type=int,
+                        required=True,
+                        help="Input simulated time in seconds for data fetching.",
+                        default=30)
+    return parser.parse_args()
 
 class WriteJson(Node):
 
@@ -152,13 +164,14 @@ class WriteJson(Node):
                 pass
 
 def main(args=None):
+    argprs = get_args()
     rclpy.init(args=args)
 
     writejson = WriteJson()
     
     stamp = time()
 
-    while time() - stamp < 30:
+    while time() - stamp < argprs.time:
         rclpy.spin_once(writejson)
 
     # Destroy the node explicitly
