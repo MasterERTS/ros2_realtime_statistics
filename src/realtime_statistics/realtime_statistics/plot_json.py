@@ -5,6 +5,8 @@ import rclpy
 from rclpy.node import Node
 import matplotlib.pyplot as plt
 import json
+import argparse
+import sys
 import subprocess
 import random
 import pathlib
@@ -20,6 +22,18 @@ if "Xenomai" in str(output):
     RT = 1
 else:
     RT = 0
+
+def get_args():
+    parser = argparse.ArgumentParser(
+        description="Real-Time Statistics Plotter."
+    )
+    parser.add_argument("-n", "--node",
+                        action="store",
+                        type=str,
+                        required=True,
+                        help="Choose 'controller' or 'driver' stats.",
+                        default="controller")
+    return parser.parse_args(sys.argv[4:])
 
 class PlotJson(Node):
 
@@ -38,21 +52,7 @@ class PlotJson(Node):
             self.driver_stats_path = default_path + "/ros2_realtime_statistics/data/driver_rt_stats.json"
             self.controller_stats_path = default_path + "/ros2_realtime_statistics/data//controller_rt_stats.json"
 
-        label = ""
-
-        if (MODE == 1):
-            label = "Controller"
-            json_data = self.read_json_file(self.controller_stats_path)
-        elif (MODE == 0):
-            label = "Driver"
-            json_data = self.read_json_file(self.driver_stats_path)
-        else:
-            print("Error : mode not supported...")
-            self.destroy_node()
-        self.dict_json_sorted = dict()
-
-        nlist = self.sorted_data_from_json(json_data)
-        self.plot_from_sorted_data(nlist, label)
+        self.plot_from_json()
 
     def read_json_file(self, path):
         with open(path, "r") as file:
@@ -113,7 +113,7 @@ class PlotJson(Node):
             plt.savefig(self.default_data_path + "rt_" + label + '.png')
         plt.show()
 
-def main(args=None):
+def main(args=get_args):
     rclpy.init(args=args)
 
     plt_json = PlotJson()
