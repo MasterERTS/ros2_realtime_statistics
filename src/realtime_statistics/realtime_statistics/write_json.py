@@ -5,6 +5,8 @@
 import rclpy
 from rclpy.node import Node
 import json
+from time import time
+from math import floor
 import pathlib
 from pendulum_msgs_v2.msg import ControllerStats 
 from pendulum_msgs_v2.msg import PendulumStats
@@ -139,8 +141,11 @@ def main(args=None):
     rclpy.init(args=args)
 
     writejson = WriteJson()
+    
+    stamp = time()
 
-    rclpy.spin(writejson)
+    while time() - stamp < 30:
+        rclpy.spin_once(writejson)
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
