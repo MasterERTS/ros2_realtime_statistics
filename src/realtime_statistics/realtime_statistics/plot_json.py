@@ -61,6 +61,7 @@ class PlotJson(Node):
     def plot_from_json(self):
         single = False
         warning = False
+        warning_str = "Warning : Comparing data with different lengths. Normalizing..."
         if self.mode == "controller":
             if self.rt == 0:
                 label = "Controller"
@@ -86,7 +87,7 @@ class PlotJson(Node):
 
                 if len(nlist) != len(nlist_b):
                     warning = True
-                    print("Warning : comparing data with different lengths")
+                    print(warning_str)
 
                 if warning:
                     if len(nlist) > len(nlist_b):
@@ -117,7 +118,7 @@ class PlotJson(Node):
 
                 if len(nlist) != len(nlist_b):
                     warning = True
-                    print("Warning : comparing data with different lengths")
+                    print(warning_str)
 
                 if warning:
                     if len(nlist) > len(nlist_b):
@@ -163,7 +164,7 @@ class PlotJson(Node):
 
                 if len(c_nlist) != len(c_nlist_b) or len(d_nlist) != len(d_nlist_b):
                     warning = True
-                    print("Warning : comparing data with different lengths")
+                    print(warning_str)
 
                 if warning:
                     if len(c_nlist) > len(c_nlist_b):
