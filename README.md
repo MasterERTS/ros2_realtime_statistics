@@ -146,10 +146,12 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## Contact
 
 Erwin Lejeune - [@spida_rwin](https://twitter.com/spida_rwin) - erwin.lejeune15@gmail.com
+Sampreet Sarkar - sampreet.sarkar@eleves.ec-nantes.fr
 
 ## Contributors
 
 - [Erwin Lejeune](https://github.com/Guilyx)
+- [Sampreet Sarkar](https://github.com/sampreets3)
 
 [saythanks-shield]:https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg?style=flat_square
 [saythanks-url]:https://saythanks.io/to/erwin.lejeune15%40gmail.com
