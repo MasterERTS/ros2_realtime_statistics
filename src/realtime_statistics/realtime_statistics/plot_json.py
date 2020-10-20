@@ -4,10 +4,14 @@
 import rclpy
 from rclpy.node import Node
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import json
 import argparse
 import random
 import pathlib
+import numpy as np
+
+plt.style.use('ggplot')
 
 
 def get_args():
@@ -29,6 +33,15 @@ class PlotJson(Node):
     def __init__(self, mode, rt):
         super().__init__("node")
 
+        params = {
+            "axes.labelsize": 8,
+            "legend.fontsize": 10,
+            "xtick.labelsize": 10,
+            "ytick.labelsize": 10,
+            "text.usetex": False,
+            "figure.figsize": [4.5, 4.5],
+        }
+        mpl.rcParams.update(params)
         self.mode = mode
         self.rt = rt
 
@@ -226,23 +239,68 @@ class PlotJson(Node):
             "Real Time " + rt_label + label + " Statistics - Inverted Pendulum"
         )
         rdn_category_key = random.choice(list(dict_json_sorted.keys()))
+        self.fig.frameon = False
+        plt.grid()
+
+        data = np.asarray(dict_json_sorted[rdn_category_key]["jitter_mean_usec"])
+        mean = np.mean(data)
+        fill = data.copy()
+        for i, _ in enumerate(fill):
+            fill[i] = .8*mean
         self.axs[0, 0].plot(
-            n_pts_list, dict_json_sorted[rdn_category_key]["jitter_mean_usec"]
+            n_pts_list,
+            dict_json_sorted[rdn_category_key]["jitter_mean_usec"],
+            linewidth=2,
+            color="#B22400",
         )
+        self.axs[0, 0].fill_between(list(range(len(dict_json_sorted[rdn_category_key]["jitter_mean_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
         self.axs[0, 0].set_title("Mean Jitters (µs)")
+
+
+        data = np.asarray(dict_json_sorted[rdn_category_key]["jitter_std_usec"])
+        mean = np.mean(data)
+        fill = data.copy()
+        for i, _ in enumerate(fill):
+            fill[i] = .1*mean
         self.axs[0, 1].plot(
-            n_pts_list, dict_json_sorted[rdn_category_key]["jitter_std_usec"]
+            n_pts_list,
+            dict_json_sorted[rdn_category_key]["jitter_std_usec"],
+            linewidth=2,
+            color="#B22400",
         )
+        self.axs[0, 1].fill_between(list(range(len(dict_json_sorted[rdn_category_key]["jitter_std_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
         self.axs[0, 1].set_title("STD Jitters (µs)")
+
+        plt.grid()       
+        data = np.asarray(dict_json_sorted[rdn_category_key]["involuntary_context_switches"])
+        mean = np.mean(data)
+        fill = data.copy()
+        for i, _ in enumerate(fill):
+            fill[i] = .1*mean
         self.axs[1, 1].plot(
             n_pts_list,
             dict_json_sorted[rdn_category_key]["involuntary_context_switches"],
+            linewidth=2,
+            color="#B22400",
         )
+        self.axs[1, 1].fill_between(list(range(len(dict_json_sorted[rdn_category_key]["involuntary_context_switches"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
         self.axs[1, 1].set_title("Involuntary Context Switches")
+
+        
+        data = np.asarray(dict_json_sorted[rdn_category_key]["jitter_max_usec"])
+        mean = np.mean(data)
+        fill = data.copy()
+        for i, _ in enumerate(fill):
+            fill[i] = .1*mean
         self.axs[1, 0].plot(
-            n_pts_list, dict_json_sorted[rdn_category_key]["jitter_max_usec"]
+            n_pts_list,
+            dict_json_sorted[rdn_category_key]["jitter_max_usec"],
+            linewidth=2,
+            color="#B22400",
         )
+        self.axs[1, 0].fill_between(list(range(len(dict_json_sorted[rdn_category_key]["jitter_max_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
         self.axs[1, 0].set_title("Max Jitters (µs)")
+
         if self.rt == 0:
             plt.savefig(self.default_data_path + "nrt_" + label + ".png")
         else:
@@ -254,64 +312,140 @@ class PlotJson(Node):
         self.fig, self.axs = plt.subplots(2, 2, figsize=(12, 8))
         self.fig.suptitle("Linux/Xenomai comparison - Inverted Pendulum")
         rdn_category_key = random.choice(list(dict_json_sorted_rt.keys()))
+
+        data = np.asarray(dict_json_sorted_rt[rdn_category_key]["jitter_mean_usec"])
+        mean = np.mean(data)
+        fill = data.copy()
+        for i, _ in enumerate(fill):
+            fill[i] = .1*mean
+        self.axs[0, 0].fill_between(list(range(len(dict_json_sorted_rt[rdn_category_key]["jitter_mean_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#006BB2')
         self.axs[0, 0].plot(
             n_pts_list,
             dict_json_sorted_rt[rdn_category_key]["jitter_mean_usec"][
                 : len(n_pts_list)
             ],
-            "tab:blue",
+            linewidth=2, linestyle='--', color='#006BB2',
         )
+        data = np.asarray(dict_json_sorted_nrt[rdn_category_key]["jitter_mean_usec"])
+        mean = np.mean(data)
+        fill = data.copy()
+        for i, _ in enumerate(fill):
+            fill[i] = .1*mean
+        self.axs[0, 0].fill_between(list(range(len(dict_json_sorted_nrt[rdn_category_key]["jitter_mean_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
         self.axs[0, 0].plot(
             n_pts_list,
             dict_json_sorted_nrt[rdn_category_key]["jitter_mean_usec"][
                 : len(n_pts_list)
             ],
-            "tab:red",
+            linewidth=2,
+            color="#B22400",
         )
+        legend = self.axs[0, 0].legend(["Xenomai", "Vanilla Linux"], loc=4)
+        frame = legend.get_frame()
+        frame.set_facecolor('0.9')
+        frame.set_edgecolor('0.9')
         self.axs[0, 0].set_title("Mean Jitters (µs)")
+
+        plt.grid()
+        data = np.asarray(dict_json_sorted_rt[rdn_category_key]["jitter_std_usec"])
+        mean = np.mean(data)
+        fill = data.copy()
+        for i, _ in enumerate(fill):
+            fill[i] = .1*mean
+        self.axs[0, 1].fill_between(list(range(len(dict_json_sorted_rt[rdn_category_key]["jitter_std_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#006BB2')
         self.axs[0, 1].plot(
             n_pts_list,
             dict_json_sorted_rt[rdn_category_key]["jitter_std_usec"][: len(n_pts_list)],
-            "tab:blue",
+            linewidth=2, linestyle='--', color='#006BB2',
         )
+        data = np.asarray(dict_json_sorted_nrt[rdn_category_key]["jitter_std_usec"])
+        mean = np.mean(data)
+        fill = data.copy()
+        for i, _ in enumerate(fill):
+            fill[i] = .1*mean
+        self.axs[0, 1].fill_between(list(range(len(dict_json_sorted_nrt[rdn_category_key]["jitter_std_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
         self.axs[0, 1].plot(
             n_pts_list,
             dict_json_sorted_nrt[rdn_category_key]["jitter_std_usec"][
                 : len(n_pts_list)
             ],
-            "tab:red",
+            linewidth=2,
+            color="#B22400",
         )
+        legend = self.axs[0, 1].legend(["Xenomai", "Vanilla Linux"], loc=4)
+        frame = legend.get_frame()
+        frame.set_facecolor('0.9')
+        frame.set_edgecolor('0.9')
         self.axs[0, 1].set_title("STD Jitters (µs)")
+
+        plt.grid()
+        data = np.asarray(dict_json_sorted_rt[rdn_category_key]["involuntary_context_switches"])
+        mean = np.mean(data)
+        fill = data.copy()
+        for i, _ in enumerate(fill):
+            fill[i] = .1*mean
+        self.axs[1, 1].fill_between(list(range(len(dict_json_sorted_rt[rdn_category_key]["involuntary_context_switches"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#006BB2')
         self.axs[1, 1].plot(
             n_pts_list,
             dict_json_sorted_rt[rdn_category_key]["involuntary_context_switches"][
                 : len(n_pts_list)
             ],
-            "tab:blue",
+            linewidth=2, linestyle='--', color='#006BB2',
             label="Xenomai",
         )
+        data = np.asarray(dict_json_sorted_nrt[rdn_category_key]["involuntary_context_switches"])
+        mean = np.mean(data)
+        fill = data.copy()
+        for i, _ in enumerate(fill):
+            fill[i] = .1*mean
+        self.axs[1, 1].fill_between(list(range(len(dict_json_sorted_nrt[rdn_category_key]["involuntary_context_switches"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
         self.axs[1, 1].plot(
             n_pts_list,
             dict_json_sorted_nrt[rdn_category_key]["involuntary_context_switches"][
                 : len(n_pts_list)
             ],
-            "tab:red",
+            linewidth=2,
+            color="#B22400",
             label="Linux",
         )
+        legend = self.axs[1, 1].legend(["Xenomai", "Vanilla Linux"], loc=4)
+        frame = legend.get_frame()
+        frame.set_facecolor('0.9')
+        frame.set_edgecolor('0.9')
         self.axs[1, 1].legend(loc="upper right")
         self.axs[1, 1].set_title("Involuntary Context Switches")
+
+        
+        plt.grid()
+        data = np.asarray(dict_json_sorted_rt[rdn_category_key]["jitter_max_usec"])
+        mean = np.mean(data)
+        fill = data.copy()
+        for i, _ in enumerate(fill):
+            fill[i] = .1*mean
+        self.axs[1, 0].fill_between(list(range(len(dict_json_sorted_rt[rdn_category_key]["jitter_max_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#006BB2')
         self.axs[1, 0].plot(
             n_pts_list,
             dict_json_sorted_rt[rdn_category_key]["jitter_max_usec"][: len(n_pts_list)],
-            "tab:blue",
+            linewidth=2, linestyle='--', color='#006BB2',
         )
+        data = np.asarray(dict_json_sorted_nrt[rdn_category_key]["jitter_max_usec"])
+        mean = np.mean(data)
+        fill = data.copy()
+        for i, _ in enumerate(fill):
+            fill[i] = .1*mean
+        self.axs[1, 0].fill_between(list(range(len(dict_json_sorted_nrt[rdn_category_key]["jitter_max_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
         self.axs[1, 0].plot(
             n_pts_list,
             dict_json_sorted_nrt[rdn_category_key]["jitter_max_usec"][
                 : len(n_pts_list)
             ],
-            "tab:red",
+            linewidth=2,
+            color="#B22400",
         )
+        legend = self.axs[1, 0].legend(["Xenomai", "Vanilla Linux"], loc=4)
+        frame = legend.get_frame()
+        frame.set_facecolor('0.9')
+        frame.set_edgecolor('0.9')
         self.axs[1, 0].set_title("Max Jitters (µs)")
         plt.savefig(self.default_data_path + "rt_nrt_" + label + "_comparison.png")
 
