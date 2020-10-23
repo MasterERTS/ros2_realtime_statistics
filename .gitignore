@@ -193,3 +193,5 @@ vgcore.*
 *.patch
 .vscode/*
 *.pyc
+data/*
+!data/.gitkeep
