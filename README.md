@@ -9,7 +9,7 @@
 
 <p align="center">
     <!--- relative path means image/image.png instead of https://etc... -->
-    <img src="data/not_stressed/rt_nrt_Driver_comparison.png" width="600" height="415">                           
+    <img src="data/from_start/rt_nrt_Controller_comparison.png" width="600" height="415">                           
 </a>
 
   <h3 align="center">ROS2 JSON</h3>
