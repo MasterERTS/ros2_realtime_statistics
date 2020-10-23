@@ -87,15 +87,13 @@ class PlotJson(Node):
                 dict_json_sorted, nlist = self.sorted_data_from_json(json_data)
                 single = True
             elif self.rt == 2:
+                
                 label = "Controller"
                 json_nrt_data = self.read_json_file(self.controller_nrt_stats_path)
                 json_rt_data = self.read_json_file(self.controller_rt_stats_path)
                 dict_json_rt_sorted, nlist = self.sorted_data_from_json(json_rt_data)
                 dict_json_nrt_sorted, nlist_b = self.sorted_data_from_json(
                     json_nrt_data
-                )
-                self.plot_rt_nrt_from_sorted_data(
-                    nlist, label, dict_json_rt_sorted, dict_json_nrt_sorted
                 )
 
                 if len(nlist) != len(nlist_b):
@@ -105,6 +103,11 @@ class PlotJson(Node):
                 if warning:
                     if len(nlist) > len(nlist_b):
                         nlist = nlist_b
+
+                self.plot_rt_nrt_from_sorted_data(
+                    nlist, label, dict_json_rt_sorted, dict_json_nrt_sorted
+                )
+
             else:
                 print("Error : mode not supported")
                 self.destroy_node()
@@ -239,66 +242,68 @@ class PlotJson(Node):
             "Real Time " + rt_label + label + " Statistics - Inverted Pendulum"
         )
         rdn_category_key = random.choice(list(dict_json_sorted.keys()))
+        for key in dict_json_sorted[rdn_category_key]:
+            dict_json_sorted[rdn_category_key][key] = dict_json_sorted[rdn_category_key][key][:len(n_pts_list)]
         self.fig.frameon = False
         plt.grid()
 
         data = np.asarray(dict_json_sorted[rdn_category_key]["jitter_mean_usec"])
-        mean = np.mean(data)
+        
         fill = data.copy()
         for i, _ in enumerate(fill):
-            fill[i] = .8*mean
+            fill[i] = np.std(data[:i+1])
         self.axs[0, 0].plot(
             n_pts_list,
             dict_json_sorted[rdn_category_key]["jitter_mean_usec"],
             linewidth=2,
             color="#B22400",
         )
-        self.axs[0, 0].fill_between(list(range(len(dict_json_sorted[rdn_category_key]["jitter_mean_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
+        self.axs[0, 0].fill_between(list(n_pts_list), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
         self.axs[0, 0].set_title("Mean Jitters (µs)")
 
 
         data = np.asarray(dict_json_sorted[rdn_category_key]["jitter_std_usec"])
-        mean = np.mean(data)
+        
         fill = data.copy()
         for i, _ in enumerate(fill):
-            fill[i] = .1*mean
+            fill[i] = np.std(data[:i+1])
         self.axs[0, 1].plot(
             n_pts_list,
             dict_json_sorted[rdn_category_key]["jitter_std_usec"],
             linewidth=2,
             color="#B22400",
         )
-        self.axs[0, 1].fill_between(list(range(len(dict_json_sorted[rdn_category_key]["jitter_std_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
+        self.axs[0, 1].fill_between(list(n_pts_list), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
         self.axs[0, 1].set_title("STD Jitters (µs)")
 
         plt.grid()       
         data = np.asarray(dict_json_sorted[rdn_category_key]["involuntary_context_switches"])
-        mean = np.mean(data)
+        
         fill = data.copy()
         for i, _ in enumerate(fill):
-            fill[i] = .1*mean
+            fill[i] = np.std(data[:i+1])
         self.axs[1, 1].plot(
             n_pts_list,
             dict_json_sorted[rdn_category_key]["involuntary_context_switches"],
             linewidth=2,
             color="#B22400",
         )
-        self.axs[1, 1].fill_between(list(range(len(dict_json_sorted[rdn_category_key]["involuntary_context_switches"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
+        self.axs[1, 1].fill_between(list(n_pts_list), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
         self.axs[1, 1].set_title("Involuntary Context Switches")
 
         
         data = np.asarray(dict_json_sorted[rdn_category_key]["jitter_max_usec"])
-        mean = np.mean(data)
+        
         fill = data.copy()
         for i, _ in enumerate(fill):
-            fill[i] = .1*mean
+            fill[i] = np.std(data[:i+1])
         self.axs[1, 0].plot(
             n_pts_list,
             dict_json_sorted[rdn_category_key]["jitter_max_usec"],
             linewidth=2,
             color="#B22400",
         )
-        self.axs[1, 0].fill_between(list(range(len(dict_json_sorted[rdn_category_key]["jitter_max_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
+        self.axs[1, 0].fill_between(list(n_pts_list), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
         self.axs[1, 0].set_title("Max Jitters (µs)")
 
         if self.rt == 0:
@@ -312,13 +317,15 @@ class PlotJson(Node):
         self.fig, self.axs = plt.subplots(2, 2, figsize=(12, 8))
         self.fig.suptitle("Linux/Xenomai comparison - Inverted Pendulum")
         rdn_category_key = random.choice(list(dict_json_sorted_rt.keys()))
-
+        for key in dict_json_sorted_nrt[rdn_category_key]:
+            dict_json_sorted_nrt[rdn_category_key][key] = dict_json_sorted_nrt[rdn_category_key][key][:len(n_pts_list)]
+            dict_json_sorted_rt[rdn_category_key][key] = dict_json_sorted_rt[rdn_category_key][key][:len(n_pts_list)]
         data = np.asarray(dict_json_sorted_rt[rdn_category_key]["jitter_mean_usec"])
-        mean = np.mean(data)
+        
         fill = data.copy()
         for i, _ in enumerate(fill):
-            fill[i] = .1*mean
-        self.axs[0, 0].fill_between(list(range(len(dict_json_sorted_rt[rdn_category_key]["jitter_mean_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#006BB2')
+            fill[i] = np.std(data[:i+1])
+        self.axs[0, 0].fill_between(list(n_pts_list), data - fill, data + fill, alpha=.2, linewidth=0, color='#006BB2')
         self.axs[0, 0].plot(
             n_pts_list,
             dict_json_sorted_rt[rdn_category_key]["jitter_mean_usec"][
@@ -327,11 +334,11 @@ class PlotJson(Node):
             linewidth=2, linestyle='--', color='#006BB2',
         )
         data = np.asarray(dict_json_sorted_nrt[rdn_category_key]["jitter_mean_usec"])
-        mean = np.mean(data)
+        
         fill = data.copy()
         for i, _ in enumerate(fill):
-            fill[i] = .1*mean
-        self.axs[0, 0].fill_between(list(range(len(dict_json_sorted_nrt[rdn_category_key]["jitter_mean_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
+            fill[i] = np.std(data[:i+1])
+        self.axs[0, 0].fill_between(list(n_pts_list), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
         self.axs[0, 0].plot(
             n_pts_list,
             dict_json_sorted_nrt[rdn_category_key]["jitter_mean_usec"][
@@ -348,22 +355,22 @@ class PlotJson(Node):
 
         plt.grid()
         data = np.asarray(dict_json_sorted_rt[rdn_category_key]["jitter_std_usec"])
-        mean = np.mean(data)
+        
         fill = data.copy()
         for i, _ in enumerate(fill):
-            fill[i] = .1*mean
-        self.axs[0, 1].fill_between(list(range(len(dict_json_sorted_rt[rdn_category_key]["jitter_std_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#006BB2')
+            fill[i] = np.std(data[:i+1])
+        self.axs[0, 1].fill_between(list(n_pts_list), data - fill, data + fill, alpha=.2, linewidth=0, color='#006BB2')
         self.axs[0, 1].plot(
             n_pts_list,
             dict_json_sorted_rt[rdn_category_key]["jitter_std_usec"][: len(n_pts_list)],
             linewidth=2, linestyle='--', color='#006BB2',
         )
         data = np.asarray(dict_json_sorted_nrt[rdn_category_key]["jitter_std_usec"])
-        mean = np.mean(data)
+        
         fill = data.copy()
         for i, _ in enumerate(fill):
-            fill[i] = .1*mean
-        self.axs[0, 1].fill_between(list(range(len(dict_json_sorted_nrt[rdn_category_key]["jitter_std_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
+            fill[i] = np.std(data[:i+1])
+        self.axs[0, 1].fill_between(list(n_pts_list), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
         self.axs[0, 1].plot(
             n_pts_list,
             dict_json_sorted_nrt[rdn_category_key]["jitter_std_usec"][
@@ -380,25 +387,25 @@ class PlotJson(Node):
 
         plt.grid()
         data = np.asarray(dict_json_sorted_rt[rdn_category_key]["involuntary_context_switches"])
-        mean = np.mean(data)
+        
         fill = data.copy()
         for i, _ in enumerate(fill):
-            fill[i] = .1*mean
-        self.axs[1, 1].fill_between(list(range(len(dict_json_sorted_rt[rdn_category_key]["involuntary_context_switches"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#006BB2')
+            fill[i] = np.std(data[:i+1])
+        self.axs[1, 1].fill_between(list(n_pts_list), data - fill, data + fill, alpha=.2, linewidth=0, color='#006BB2')
         self.axs[1, 1].plot(
             n_pts_list,
             dict_json_sorted_rt[rdn_category_key]["involuntary_context_switches"][
                 : len(n_pts_list)
             ],
             linewidth=2, linestyle='--', color='#006BB2',
-            label="Xenomai",
         )
         data = np.asarray(dict_json_sorted_nrt[rdn_category_key]["involuntary_context_switches"])
-        mean = np.mean(data)
+        
+        plt.grid()
         fill = data.copy()
         for i, _ in enumerate(fill):
-            fill[i] = .1*mean
-        self.axs[1, 1].fill_between(list(range(len(dict_json_sorted_nrt[rdn_category_key]["involuntary_context_switches"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
+            fill[i] = np.std(data[:i+1])
+        self.axs[1, 1].fill_between(list(n_pts_list), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
         self.axs[1, 1].plot(
             n_pts_list,
             dict_json_sorted_nrt[rdn_category_key]["involuntary_context_switches"][
@@ -406,34 +413,32 @@ class PlotJson(Node):
             ],
             linewidth=2,
             color="#B22400",
-            label="Linux",
         )
         legend = self.axs[1, 1].legend(["Xenomai", "Vanilla Linux"], loc=4)
         frame = legend.get_frame()
         frame.set_facecolor('0.9')
         frame.set_edgecolor('0.9')
-        self.axs[1, 1].legend(loc="upper right")
         self.axs[1, 1].set_title("Involuntary Context Switches")
 
         
         plt.grid()
         data = np.asarray(dict_json_sorted_rt[rdn_category_key]["jitter_max_usec"])
-        mean = np.mean(data)
+        
         fill = data.copy()
         for i, _ in enumerate(fill):
-            fill[i] = .1*mean
-        self.axs[1, 0].fill_between(list(range(len(dict_json_sorted_rt[rdn_category_key]["jitter_max_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#006BB2')
+            fill[i] = np.std(data[:i+1])
+        self.axs[1, 0].fill_between(list(n_pts_list), data - fill, data + fill, alpha=.2, linewidth=0, color='#006BB2')
         self.axs[1, 0].plot(
             n_pts_list,
             dict_json_sorted_rt[rdn_category_key]["jitter_max_usec"][: len(n_pts_list)],
             linewidth=2, linestyle='--', color='#006BB2',
         )
         data = np.asarray(dict_json_sorted_nrt[rdn_category_key]["jitter_max_usec"])
-        mean = np.mean(data)
+        
         fill = data.copy()
         for i, _ in enumerate(fill):
-            fill[i] = .1*mean
-        self.axs[1, 0].fill_between(list(range(len(dict_json_sorted_nrt[rdn_category_key]["jitter_max_usec"]))), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
+            fill[i] = np.std(data[:i+1])
+        self.axs[1, 0].fill_between(list(n_pts_list), data - fill, data + fill, alpha=.2, linewidth=0, color='#B22400')
         self.axs[1, 0].plot(
             n_pts_list,
             dict_json_sorted_nrt[rdn_category_key]["jitter_max_usec"][
