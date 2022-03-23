@@ -14,7 +14,7 @@
 
   <h3 align="center">ROS2 JSON</h3>
 
-  <p align="center">
+  <p align="center">faf
     Subscribe to ROS2 realtime statistics topics and manipulate the data.
     <br />
     <a href="https://github.com/MasterERTS/ros2_json/blob/master/README.md"><strong>Explore the docs »</strong></a>
